@@ -20,7 +20,10 @@ public:
     template<typename T, typename = std::enable_if<std::is_enum<T>::value || std::is_integral<T>::value>>
     Response update_parameter_value(T *parameter, const PacketHeader<PacketEnumT> &header, const void *data);
 
-    Response update_parameter_value(uint8_t *parameter, uint8_t size, const PacketHeader<PacketEnumT> &header, const void *data);
+    Response update_parameter_value(void *pointer, uint8_t size, const PacketHeader<PacketEnumT> &header, const void *data);
+
+    template<typename T, uint8_t N, typename = std::enable_if_t<std::is_enum<T>::value || std::is_integral<T>::value>>
+    Response update_parameter_value_array(T (&array)[N], const PacketHeader<PacketEnumT> &header, const void *data);
 
     Response update_string_value(char *str, uint8_t max_size, const PacketHeader<PacketEnumT> &header, const void *data);
 
@@ -33,6 +36,9 @@ public:
 
     template<typename E, typename = std::enable_if_t<std::is_trivial_v<E>>>
     constexpr auto to_underlying(E e) noexcept;
+
+protected:
+    Response _update_value(uint8_t *target, uint8_t target_size, PacketEnumT type, const void *data, uint8_t data_size);
 };
 
 template<typename PacketT, typename S1>
@@ -176,19 +182,48 @@ Response BinaryProtocol<PacketT, S1>::update_string_value(
 
 template<typename PacketT, typename S1>
 Response BinaryProtocol<PacketT, S1>::update_parameter_value(
-        uint8_t *parameter, uint8_t size, const PacketHeader<PacketT> &header, const void *data) {
+        void *pointer, uint8_t size, const PacketHeader<PacketT> &header, const void *data) {
     if (header.size != size) {
         D_PRINTF("Unable to update value, bad size. Got %u, expected %u\n", header.size, size);
         return Response::code(ResponseCode::BAD_REQUEST);
     }
 
-    memcpy(parameter, data, size);
+    memcpy(pointer, data, size);
 
     D_WRITE("Update parameter ");
     D_WRITE(__debug_enum_str(header.type));
     D_WRITE(" = ");
 
-    D_PRINT_HEX(parameter, size);
+    D_PRINT_HEX((uint8_t *) pointer, size);
+
+    return Response::ok();
+}
+
+template<typename PacketEnumT, typename S1>
+template<typename T, uint8_t N, typename>
+Response
+BinaryProtocol<PacketEnumT, S1>::update_parameter_value_array(T (&array)[N], const PacketHeader<PacketEnumT> &header, const void *data) {
+    const auto expected_size = sizeof(T) + sizeof(N);
+    if (header.size != expected_size) {
+        D_PRINTF("Unable to update array value, bad size. Got %u, expected %u\n", header.size, expected_size);
+        return Response::code(ResponseCode::BAD_REQUEST);
+    }
+
+    decltype(N) index;
+    memcpy(&index, data, sizeof(N));
+
+    if (index >= N) {
+        D_PRINTF("Unable to update array value, bad index. Got %u, but array size is %u\n", index, N);
+        return Response::code(ResponseCode::BAD_REQUEST);
+    }
+
+    memcpy((array + index), (const uint8_t *) data + sizeof(N), sizeof(T));
+
+    D_WRITE("Update parameter ");
+    D_PRINTF("%s[%u]", __debug_enum_str(header.type), index);
+    D_WRITE(" = ");
+
+    D_PRINT_HEX((uint8_t *) (array + index), sizeof(T));
 
     return Response::ok();
 }
