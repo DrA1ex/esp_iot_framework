@@ -14,7 +14,7 @@
 #define D_PRINT_HEX(ptr, length)                        \
         D_WRITE("HEX: ");                               \
         for (unsigned int i = 0; i < length; ++i) {     \
-            D_PRINTF("%02X ", ptr[i]);                  \
+            D_PRINTF("%02X ", (ptr)[i]);                \
         }                                               \
         D_PRINT()
 
