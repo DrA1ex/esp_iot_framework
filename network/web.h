@@ -21,6 +21,8 @@ public:
     }
 
     inline void add_handler(AsyncWebHandler *handler) { _server.addHandler(handler); }
+
+    inline uint16_t port() const { return _port; }
 };
 
 class WebAuthHandler : public AsyncWebHandler {

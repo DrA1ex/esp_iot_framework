@@ -110,6 +110,8 @@ void MqttServer<ApplicationT, C1>::_change_state(MqttServerState state) {
 
 template<typename ApplicationT, typename C1>
 void MqttServer<ApplicationT, C1>::handle_connection() {
+    if (_state == MqttServerState::UNINITIALIZED) return;
+
     if (_state == MqttServerState::DISCONNECTED && (millis() - _last_connection_attempt_time) > MQTT_RECONNECT_TIMEOUT) {
         D_PRINT("MQTT Reconnecting...");
 

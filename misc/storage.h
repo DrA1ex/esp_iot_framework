@@ -27,7 +27,7 @@ class Storage {
     long _save_timer_id = -1;
 
 public:
-    Storage(Timer &timer, const char *key, uint8_t version, uint32_t header);
+    Storage(Timer &timer, const char *key, uint8_t version = 1, uint32_t header = 0xd0c1f2c3);
 
     Storage(const Storage &) = delete;
     Storage &operator=(const Storage &) = delete;
