@@ -32,6 +32,8 @@ public:
     void handle_connection();
 
     inline WifiManagerState state() { return _state; }
+    inline WifiMode mode() { return _mode; }
+    inline const char *password() { return _password; }
 
 private:
     void _connect_ap();
