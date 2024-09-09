@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef ARDUINO_ARCH_ESP32
 #include <qrcode.h>
 
 inline void qr_print_string(const char *str) {
@@ -21,3 +22,13 @@ inline void qr_print_wifi_connection(const char *ssid, const char *password) {
 
     qr_print_string(connection_str.c_str());
 }
+
+#else
+inline void qr_print_string(const char *) {
+    D_PRINT("QR code not supported");
+}
+
+inline void qr_print_wifi_connection(const char *, const char *) {
+    qr_print_string(nullptr);
+}
+#endif
