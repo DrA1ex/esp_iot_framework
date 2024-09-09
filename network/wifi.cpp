@@ -25,7 +25,9 @@
 #include "lib/debug.h"
 
 WifiManager::WifiManager(const char *ssid, const char *password, unsigned long connection_check_interval) :
-        _ssid(ssid), _password(password), _connection_check_interval(connection_check_interval) {}
+        _ssid(ssid), _password(password), _connection_check_interval(connection_check_interval) {
+    if (strlen(_password) < 8) _password = "12345678";
+}
 
 void WifiManager::connect(WifiMode mode, unsigned long connection_interval) {
     if (_state == WifiManagerState::CONNECTING) return;
@@ -77,7 +79,7 @@ void WifiManager::_connect_ap() {
     String ssid = String(_ssid) + "_" + chip_id;
     WiFi.softAP(ssid, _password);
 
-    D_PRINTF("Wi-Fi connected! Mode: AP, SSID: %s, IP address: ", ssid.c_str());
+    D_PRINTF("Wi-Fi connected! Mode: AP, SSID: %s, Password: %s, IP address: ", ssid.c_str(), _password);
     D_PRINT(WiFi.softAPIP());
 
     _state = WifiManagerState::CONNECTED;
