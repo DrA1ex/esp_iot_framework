@@ -82,21 +82,21 @@ void Storage<T, S1>::begin(FS *fs) {
                 file.read((uint8_t *) &_data, sizeof(_data));
                 success = true;
 
-                D_PRINTF("Storage(%s): Loaded stored value version: %u, size %u\n", _key, saved_version, size());
+                D_PRINTF("Storage(%s): Loaded stored value version: %u, size %u\r\n", _key, saved_version, size());
             } else {
-                D_PRINTF("Storage(%s): Unsupported value, expected version: %u, header: %X\n", _key, _version, _header);
+                D_PRINTF("Storage(%s): Unsupported value, expected version: %u, header: %X\r\n", _key, _version, _header);
             }
         } else {
-            D_PRINTF("Storage(%s): Size doesn't match, expected %u, got %u\n", _key, size(), file.size());
+            D_PRINTF("Storage(%s): Size doesn't match, expected %u, got %u\r\n", _key, size(), file.size());
         }
 
         file.close();
     } else {
-        D_PRINTF("Storage(%s): Data doesn't exists\n", _key);
+        D_PRINTF("Storage(%s): Data doesn't exists\r\n", _key);
     }
 
     if (!success) {
-        D_PRINTF("Storage(%s): Reset value...\n", _key);
+        D_PRINTF("Storage(%s): Reset value...\r\n", _key);
         _data = T();
     }
 }
@@ -114,7 +114,7 @@ void Storage<T, S1>::_commit_impl() {
     File file = _fs->open(_get_path(), "r");
     if (file && !_check_changed(file)) {
         file.close();
-        D_PRINTF("Storage(%s): Skip commit, data not changed\n", _key);
+        D_PRINTF("Storage(%s): Skip commit, data not changed\r\n", _key);
         return;
     }
 
@@ -128,7 +128,7 @@ void Storage<T, S1>::_commit_impl() {
     file.write((uint8_t *) &_version, sizeof(_version));
     file.write((uint8_t *) &_data, sizeof(T));
 
-    D_PRINTF("Storage(%s): Changes committed\n", _key);
+    D_PRINTF("Storage(%s): Changes committed\r\n", _key);
 
     file.close();
 }
@@ -154,11 +154,11 @@ void Storage<T, S1>::save() {
     if (!_fs) return;
 
     if (_save_timer_id != -1) {
-        D_PRINTF("Storage(%s): Clear existing save timer\n", _key);
+        D_PRINTF("Storage(%s): Clear existing save timer\r\n", _key);
         _timer.clear_timeout(_save_timer_id);
     }
 
-    D_PRINTF("Storage(%s): Schedule storage commit...\n", _key);
+    D_PRINTF("Storage(%s): Schedule storage commit...\r\n", _key);
     _save_timer_id = (long) _timer.add_timeout([](void *param) {
         auto *self = (Storage *) param;
         self->_save_timer_id = -1;
@@ -169,7 +169,7 @@ void Storage<T, S1>::save() {
 template<typename T, typename S1>
 void Storage<T, S1>::force_save() {
     if (_save_timer_id != -1) {
-        D_PRINTF("Storage(%s): Clear existing Storage save timer\n", _key);
+        D_PRINTF("Storage(%s): Clear existing Storage save timer\r\n", _key);
 
         _timer.clear_timeout(_save_timer_id);
     }

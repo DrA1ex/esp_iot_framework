@@ -62,7 +62,7 @@ template<uint8_t StrSize>
 Response BinaryProtocol<PacketT, S1>::update_string_list_value(
         char (*destination)[StrSize], const uint8_t max_count, const PacketHeader<PacketT> &header, const void *data) {
     if (header.size < 2) {
-        D_PRINTF("Unable to update string list, bad size. Got %u, expected at least %u\n", header.size, 2);
+        D_PRINTF("Unable to update string list, bad size. Got %u, expected at least %u\r\n", header.size, 2);
         return Response::code(ResponseCode::BAD_REQUEST);
     }
 
@@ -71,7 +71,7 @@ Response BinaryProtocol<PacketT, S1>::update_string_list_value(
     size_t offset = 1;
 
     if (dst_index >= max_count) {
-        D_PRINTF("Unable to update string list, bad destination offset. Got %u, but limit is %u\n", dst_index, max_count - 1);
+        D_PRINTF("Unable to update string list, bad destination offset. Got %u, but limit is %u\r\n", dst_index, max_count - 1);
         return Response::code(ResponseCode::BAD_REQUEST);
     }
 
@@ -85,12 +85,12 @@ Response BinaryProtocol<PacketT, S1>::update_string_list_value(
         }
 
         const size_t length = strnlen(input, header.size - offset);
-        if (length > StrSize) D_PRINTF("Value at %u will be truncated. Read size %u, but limit is %u\n", dst_index, length, StrSize);
+        if (length > StrSize) D_PRINTF("Value at %u will be truncated. Read size %u, but limit is %u\r\n", dst_index, length, StrSize);
 
         memcpy(destination[dst_index], input, std::min((uint8_t) length, StrSize));
         if (length < StrSize) destination[dst_index][length] = '\0';
 
-        D_PRINTF("Update #%u: %.*s (%u)\n", dst_index, StrSize, destination[dst_index], length);
+        D_PRINTF("Update #%u: %.*s (%u)\r\n", dst_index, StrSize, destination[dst_index], length);
 
         dst_index++;
         updated_count++;
@@ -100,7 +100,7 @@ Response BinaryProtocol<PacketT, S1>::update_string_list_value(
 
     D_WRITE("Update string list ");
     D_WRITE(__debug_enum_str(header.type));
-    D_PRINTF(" (Count: %i)\n", updated_count);
+    D_PRINTF(" (Count: %i)\r\n", updated_count);
 
     return Response::ok();
 }
@@ -109,7 +109,7 @@ template<typename PacketT, typename S1>
 template<typename T, typename>
 Response BinaryProtocol<PacketT, S1>::update_parameter_value(T *parameter, const PacketHeader<PacketT> &header, const void *data) {
     if (header.size != sizeof(T)) {
-        D_PRINTF("Unable to update value, bad size. Got %u, expected %u\n", header.size, sizeof(T));
+        D_PRINTF("Unable to update value, bad size. Got %u, expected %u\r\n", header.size, sizeof(T));
         return Response::code(ResponseCode::BAD_REQUEST);
     }
 
@@ -136,27 +136,27 @@ PacketParsingResponse<PacketT> BinaryProtocol<PacketT, S1>::parse_packet(const u
 
     const auto header_size = sizeof(PacketHeader<PacketT>);
     if (length < header_size) {
-        D_PRINTF("Wrong packet size. Expected at least: %u\n", header_size);
+        D_PRINTF("Wrong packet size. Expected at least: %u\r\n", header_size);
 
         return PacketParsingResponse<PacketT>::fail(Response::code(ResponseCode::PACKET_LENGTH_EXCEEDED));
     }
 
     auto *packet = (PacketHeader<PacketT> *) buffer;
     if (packet->signature != PACKET_SIGNATURE) {
-        D_PRINTF("Wrong packet signature: %X\n", packet->signature);
+        D_PRINTF("Wrong packet signature: %X\r\n", packet->signature);
 
         return PacketParsingResponse<PacketT>::fail(Response::code(ResponseCode::BAD_REQUEST), packet->request_id);
     }
 
     if (header_size + packet->size != length) {
-        D_PRINTF("Wrong message length, expected: %u\n", header_size + packet->size);
+        D_PRINTF("Wrong message length, expected: %u\r\n", header_size + packet->size);
 
         return PacketParsingResponse<PacketT>::fail(Response::code(ResponseCode::BAD_REQUEST), packet->request_id);
     }
 
-    D_PRINTF("---- Packet type: %s\n", __debug_enum_str(packet->type));
-    D_PRINTF("---- Packet Request-ID: %u\n", packet->request_id);
-    D_PRINTF("---- Packet Data-Size: %u\n", packet->size);
+    D_PRINTF("---- Packet type: %s\r\n", __debug_enum_str(packet->type));
+    D_PRINTF("---- Packet Request-ID: %u\r\n", packet->request_id);
+    D_PRINTF("---- Packet Data-Size: %u\r\n", packet->size);
 
     const void *data = buffer + header_size;
     return PacketParsingResponse<PacketT>::ok({packet, data}, packet->request_id);
@@ -166,7 +166,7 @@ template<typename PacketT, typename S1>
 Response BinaryProtocol<PacketT, S1>::update_string_value(
         char *str, uint8_t max_size, const PacketHeader<PacketT> &header, const void *data) {
     if (header.size > max_size) {
-        D_PRINTF("Unable to update value, data too long. Got %u, but limit is %u\n", header.size, max_size);
+        D_PRINTF("Unable to update value, data too long. Got %u, but limit is %u\r\n", header.size, max_size);
         return Response::code(ResponseCode::BAD_REQUEST);
     }
 
@@ -175,7 +175,7 @@ Response BinaryProtocol<PacketT, S1>::update_string_value(
 
     D_WRITE("Update parameter ");
     D_WRITE(to_underlying(header.type));
-    D_PRINTF(" = %.*s\n", max_size, str);
+    D_PRINTF(" = %.*s\r\n", max_size, str);
 
     return Response::ok();
 }
@@ -184,7 +184,7 @@ template<typename PacketT, typename S1>
 Response BinaryProtocol<PacketT, S1>::update_parameter_value(
         void *pointer, uint8_t size, const PacketHeader<PacketT> &header, const void *data) {
     if (header.size != size) {
-        D_PRINTF("Unable to update value, bad size. Got %u, expected %u\n", header.size, size);
+        D_PRINTF("Unable to update value, bad size. Got %u, expected %u\r\n", header.size, size);
         return Response::code(ResponseCode::BAD_REQUEST);
     }
 
@@ -205,7 +205,7 @@ Response
 BinaryProtocol<PacketEnumT, S1>::update_parameter_value_array(T (&array)[N], const PacketHeader<PacketEnumT> &header, const void *data) {
     const auto expected_size = sizeof(T) + sizeof(N);
     if (header.size != expected_size) {
-        D_PRINTF("Unable to update array value, bad size. Got %u, expected %u\n", header.size, expected_size);
+        D_PRINTF("Unable to update array value, bad size. Got %u, expected %u\r\n", header.size, expected_size);
         return Response::code(ResponseCode::BAD_REQUEST);
     }
 
@@ -213,7 +213,7 @@ BinaryProtocol<PacketEnumT, S1>::update_parameter_value_array(T (&array)[N], con
     memcpy(&index, data, sizeof(N));
 
     if (index >= N) {
-        D_PRINTF("Unable to update array value, bad index. Got %u, but array size is %u\n", index, N);
+        D_PRINTF("Unable to update array value, bad index. Got %u, but array size is %u\r\n", index, N);
         return Response::code(ResponseCode::BAD_REQUEST);
     }
 

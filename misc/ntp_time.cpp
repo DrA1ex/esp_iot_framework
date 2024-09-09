@@ -19,7 +19,7 @@ void NtpTime::begin(float tz) {
 void NtpTime::update() {
     bool success = _ntp_client.update();
 
-    if (success) D_PRINTF("NtpTime loaded. Now: %s\n", D_TIME_STRING(epoch_tz()));
+    if (success) D_PRINTF("NtpTime loaded. Now: %s\r\n", D_TIME_STRING(epoch_tz()));
 }
 
 tm *NtpTime::date() const {

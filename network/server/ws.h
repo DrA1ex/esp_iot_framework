@@ -109,15 +109,15 @@ void WebSocketServer<ApplicationT, C1>::on_event(AsyncWebSocket *,
 
     switch (type) {
         case WS_EVT_CONNECT:
-            D_PRINTF("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+            D_PRINTF("WebSocket client #%u connected from %s\r\n", client->id(), client->remoteIP().toString().c_str());
             break;
 
         case WS_EVT_DISCONNECT:
-            D_PRINTF("WebSocket client #%u disconnected\n", client->id());
+            D_PRINTF("WebSocket client #%u disconnected\r\n", client->id());
             break;
 
         case WS_EVT_DATA: {
-            D_PRINTF("WebSocket received packet, size: %u\n", len);
+            D_PRINTF("WebSocket received packet, size: %u\r\n", len);
 
             if (len == 0) {
                 _send_response(client->id(), 0, Response::code(ResponseCode::PACKET_LENGTH_EXCEEDED));
@@ -125,7 +125,7 @@ void WebSocketServer<ApplicationT, C1>::on_event(AsyncWebSocket *,
             }
 
             if (len > WS_MAX_PACKET_SIZE) {
-                D_PRINTF("WebSocket packet dropped. Max packet size %ui\n, but received %u", WS_MAX_PACKET_SIZE, len);
+                D_PRINTF("WebSocket packet dropped. Max packet size %ui\r\n, but received %u", WS_MAX_PACKET_SIZE, len);
                 _send_response(client->id(), 0, Response::code(ResponseCode::PACKET_LENGTH_EXCEEDED));
                 return;
             }
@@ -162,12 +162,12 @@ void WebSocketServer<ApplicationT, C1>::notify_clients(uint32_t sender_id, Packe
     (*(PacketHeader<PacketEnumT> *) message) = PacketHeader<PacketEnumT>{PACKET_SIGNATURE, 0, type, size};
     mempcpy(message + sizeof(PacketHeader<PacketEnumT>), data, size);
 
-    D_PRINTF("WebSocket send notification: %s, total size: %u, data size: %u\n", __debug_enum_str(type), sizeof(message), size);
+    D_PRINTF("WebSocket send notification: %s, total size: %u, data size: %u\r\n", __debug_enum_str(type), sizeof(message), size);
 
     for (auto &client: _ws.getClients()) {
         if (sender_id == client->id()) continue;
 
-        VERBOSE(D_PRINTF("Websocket send notification to client: %u\n", client->id()));
+        VERBOSE(D_PRINTF("Websocket send notification to client: %u\r\n", client->id()));
         _ws.binary(client->id(), message, sizeof(message));
     }
 }
@@ -175,7 +175,7 @@ void WebSocketServer<ApplicationT, C1>::notify_clients(uint32_t sender_id, Packe
 template<typename ApplicationT, typename C1>
 template<typename T>
 void WebSocketServer<ApplicationT, C1>::notify_clients(uint32_t sender_id, PacketEnumT type, const T &value) {
-    D_PRINTF("WebSocket send value message size: %u\n", sizeof(value));
+    D_PRINTF("WebSocket send value message size: %u\r\n", sizeof(value));
 
     notify_clients(sender_id, type, &value, sizeof(value));
 }
@@ -233,7 +233,7 @@ void WebSocketServer<ApplicationT, C1>::_handle_notification(void *, PropEnumT t
 
     const auto prop_iterator = prop_meta.find(type);
     if (prop_iterator == prop_meta.cend()) {
-        D_PRINTF("WebSocket unsupported notification type %s\n", __debug_enum_str(type));
+        D_PRINTF("WebSocket unsupported notification type %s\r\n", __debug_enum_str(type));
         return;
     }
 
@@ -243,7 +243,7 @@ void WebSocketServer<ApplicationT, C1>::_handle_notification(void *, PropEnumT t
     const auto &meta = prop[0];
 
     VERBOSE(
-            D_PRINTF("WebSocket preparing notification data for %s, size: %u, offset: %u\n",
+            D_PRINTF("WebSocket preparing notification data for %s, size: %u, offset: %u\r\n",
                      __debug_enum_str(type), meta.value_size, meta.value_offset)
     );
 
@@ -255,7 +255,7 @@ void WebSocketServer<ApplicationT, C1>::_handle_notification(void *, PropEnumT t
         notify_clients(client_id, meta.packet_type, data, meta.value_size);
     } else {
         if (meta.value_size != 1) {
-            D_PRINTF("WebSocket unsupported notification for trigger type %s. Expected size 1 byte, but got %u\n",
+            D_PRINTF("WebSocket unsupported notification for trigger type %s. Expected size 1 byte, but got %u\r\n",
                      __debug_enum_str(type), meta.value_size);
             return;
         }

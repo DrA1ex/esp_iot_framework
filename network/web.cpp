@@ -2,7 +2,7 @@
 
 class WebLogger : public AsyncWebHandler {
     bool canHandle(AsyncWebServerRequest *request) override {
-        D_PRINTF("WebServer: %s -> %s %s\n", request->client()->remoteIP().toString().c_str(),
+        D_PRINTF("WebServer: %s -> %s %s\r\n", request->client()->remoteIP().toString().c_str(),
                  request->methodToString(), request->url().c_str());
 
         return false;
@@ -34,7 +34,7 @@ WebAuthHandler::WebAuthHandler(const char *user, const char *password, bool allo
         _user(user), _password(password), _allow_local(allow_local) {}
 
 void WebAuthHandler::handleRequest(AsyncWebServerRequest *request) {
-    D_PRINTF("Reject request from: %s\n", request->client()->remoteIP().toString().c_str());
+    D_PRINTF("Reject request from: %s\r\n", request->client()->remoteIP().toString().c_str());
 
     request->redirect("https://google.com");
 }

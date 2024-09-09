@@ -140,7 +140,7 @@ void MqttServer<ApplicationT, C1>::_on_connect(bool) {
 
 template<typename ApplicationT, typename C1>
 void MqttServer<ApplicationT, C1>::_on_disconnect(AsyncMqttClientDisconnectReason reason) {
-    D_PRINTF("MQTT Disconnected. Reason %u\n", (uint8_t) reason);
+    D_PRINTF("MQTT Disconnected. Reason %u\r\n", (uint8_t) reason);
 
     _change_state(MqttServerState::DISCONNECTED);
 }
@@ -148,7 +148,7 @@ void MqttServer<ApplicationT, C1>::_on_disconnect(AsyncMqttClientDisconnectReaso
 template<typename ApplicationT, typename C1>
 void MqttServer<ApplicationT, C1>::_on_message(char *topic, char *payload, AsyncMqttClientMessageProperties properties,
                                                size_t len, size_t index, size_t total) {
-    D_PRINTF("MQTT Received: %s: \"%.*s\"\n", topic, len, payload);
+    D_PRINTF("MQTT Received: %s: \"%.*s\"\r\n", topic, len, payload);
 
     String topic_str(topic);
     String payload_str{};
@@ -162,26 +162,26 @@ void MqttServer<ApplicationT, C1>::_on_message(char *topic, char *payload, Async
 template<typename ApplicationT, typename C1>
 void MqttServer<ApplicationT, C1>::_subscribe(const char *topic, uint8_t qos) {
     _mqttClient.subscribe(topic, qos);
-    D_PRINTF("MQTT Subscribe: \"%s\"\n", topic);
+    D_PRINTF("MQTT Subscribe: \"%s\"\r\n", topic);
 }
 
 template<typename ApplicationT, typename C1>
 void MqttServer<ApplicationT, C1>::_publish(const char *topic, uint8_t qos, const char *payload, size_t length) {
     if (_state != MqttServerState::CONNECTED) {
-        D_PRINTF("MQTT Not connected. Skip message to %s\n", topic);
+        D_PRINTF("MQTT Not connected. Skip message to %s\r\n", topic);
         return;
     };
 
     _mqttClient.publish(topic, qos, true, payload, length);
 
-    D_PRINTF("MQTT Publish: %s: \"%.*s\"\n", topic, length, payload);
+    D_PRINTF("MQTT Publish: %s: \"%.*s\"\r\n", topic, length, payload);
 }
 
 template<typename ApplicationT, typename C1>
 void MqttServer<ApplicationT, C1>::_process_message(const String &topic, const String &payload) {
     auto iter_meta = _app.topic_property_meta().find(topic);
     if (iter_meta == _app.topic_property_meta().end()) {
-        D_PRINTF("MQTT: Message in unsupported topic: %s\n", topic.c_str());
+        D_PRINTF("MQTT: Message in unsupported topic: %s\r\n", topic.c_str());
         return;
     }
 
@@ -204,7 +204,7 @@ void MqttServer<ApplicationT, C1>::_process_message(const String &topic, const S
             break;
 
         default:
-            D_PRINTF("MQTT: Unsupported value size: %u. topic: %s\n", meta.value_size, topic.c_str());
+            D_PRINTF("MQTT: Unsupported value size: %u. topic: %s\r\n", meta.value_size, topic.c_str());
             return;
     }
 
@@ -224,7 +224,7 @@ void MqttServer<ApplicationT, C1>::_process_notification(PropEnumT prop) {
     const auto meta = iter_meta->second[0];
     if (meta.mqtt_out_topic == nullptr) return;
 
-    D_PRINTF("MQTT: Processing notification for %s\n", __debug_enum_str(prop));
+    D_PRINTF("MQTT: Processing notification for %s\r\n", __debug_enum_str(prop));
 
     switch (meta.value_size) {
         case 8:
@@ -244,7 +244,7 @@ void MqttServer<ApplicationT, C1>::_process_notification(PropEnumT prop) {
             break;
 
         default:
-            D_PRINTF("MQTT: Unsupported value size: %u\n", meta.value_size);
+            D_PRINTF("MQTT: Unsupported value size: %u\r\n", meta.value_size);
             return;
     }
 }

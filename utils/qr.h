@@ -8,7 +8,7 @@ inline void qr_print_string(const char *str) {
 
     auto ret = esp_qrcode_generate(&cfg, str);
     if (ret != 0) {
-        D_PRINTF("Unable to generate QR-code, return code: %i\n", ret);
+        D_PRINTF("Unable to generate QR-code, return code: %i\r\n", ret);
         return;
     }
 }

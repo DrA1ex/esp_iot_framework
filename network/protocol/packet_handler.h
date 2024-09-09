@@ -43,7 +43,7 @@ Response PacketHandler<ApplicationT, S1>::handle_packet_data(uint32_t client_id,
         if (meta_iterator != packet_meta.end()) {
             app().notify_property_changed(this, meta_iterator->second.property, &client_id);
         } else {
-            D_PRINTF("Unsupported notification packet type: %s\n", __debug_enum_str(packet.header->type));
+            D_PRINTF("Unsupported notification packet type: %s\r\n", __debug_enum_str(packet.header->type));
         }
     }
 
@@ -67,7 +67,7 @@ Response PacketHandler<ApplicationT, S1>::handle_parameter_update(PacketHeaderT 
     auto meta_iter = _app.packet_meta().find(header->type);
 
     if (meta_iter == _app.packet_meta().cend()) {
-        D_PRINTF("Received unsupported parameter: %u (%s)\n", _protocol.to_underlying(header->type), __debug_enum_str(header->type));
+        D_PRINTF("Received unsupported parameter: %u (%s)\r\n", _protocol.to_underlying(header->type), __debug_enum_str(header->type));
         return Response::code(ResponseCode::BAD_COMMAND);
     }
     auto &meta = meta_iter->second;

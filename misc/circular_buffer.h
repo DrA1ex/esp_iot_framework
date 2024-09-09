@@ -22,7 +22,7 @@ public:
     T *acquire() {
         if (!can_acquire()) return nullptr;
 
-        VERBOSE(D_PRINTF("Acquire value at %u; Used: %u / %u\n", _next_index, _used + 1, Size));
+        VERBOSE(D_PRINTF("Acquire value at %u; Used: %u / %u\r\n", _next_index, _used + 1, Size));
 
         auto value = &_buffer[_next_index];
         _used++;
@@ -37,7 +37,7 @@ public:
         const auto index = (Size + _next_index - _used) % Size;
         _used--;
 
-        VERBOSE(D_PRINTF("Pop value at %u; Used: %u / %u\n", index, _used, Size));
+        VERBOSE(D_PRINTF("Pop value at %u; Used: %u / %u\r\n", index, _used, Size));
 
         return &_buffer[index];
     }

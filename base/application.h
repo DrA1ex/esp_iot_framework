@@ -70,13 +70,13 @@ AbstractApplication<CfgT, MetaT, S1>::AbstractApplication(const std::map<PacketE
     VERBOSE(
             D_PRINT("Application config properties:");
             for (auto &[key, meta]: _packetTypeMetadataMap) {
-                D_PRINTF("Key: %s\n", __debug_enum_str(key));
-                D_PRINTF("---- Property: %s\n", __debug_enum_str(meta.property));
-                D_PRINTF("---- Packet: %s\n", __debug_enum_str(meta.packet_type));
-                D_PRINTF("---- Topic-in: %s\n", meta.mqtt_in_topic ?: "null");
-                D_PRINTF("---- Topic-out: %s\n", meta.mqtt_out_topic ?: "null");
-                D_PRINTF("---- Offset: %u\n", meta.value_offset);
-                D_PRINTF("---- Size: %u\n", meta.value_size);
+                D_PRINTF("Key: %s\r\n", __debug_enum_str(key));
+                D_PRINTF("---- Property: %s\r\n", __debug_enum_str(meta.property));
+                D_PRINTF("---- Packet: %s\r\n", __debug_enum_str(meta.packet_type));
+                D_PRINTF("---- Topic-in: %s\r\n", meta.mqtt_in_topic ?: "null");
+                D_PRINTF("---- Topic-out: %s\r\n", meta.mqtt_out_topic ?: "null");
+                D_PRINTF("---- Offset: %u\r\n", meta.value_offset);
+                D_PRINTF("---- Size: %u\r\n", meta.value_size);
             }
     )
 }
