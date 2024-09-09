@@ -76,12 +76,13 @@ void WifiManager::_connect_ap() {
     String chip_id = String(__ID, HEX);
     chip_id.toUpperCase();
 
-    String ssid = String(_ssid) + "_" + chip_id;
+    static String ssid = String(_ssid) + "_" + chip_id;
     WiFi.softAP(ssid, _password);
 
     D_PRINTF("Wi-Fi connected! Mode: AP, SSID: %s, Password: %s, IP address: ", ssid.c_str(), _password);
     D_PRINT(WiFi.softAPIP());
 
+    _ssid = ssid.c_str();
     _state = WifiManagerState::CONNECTED;
 }
 
