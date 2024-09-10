@@ -13,7 +13,7 @@ Timer::~Timer() {
     _free_count = 0;
 }
 
-unsigned long Timer::add_timeout(TimerFn callback, unsigned long interval, void *parameter) {
+unsigned long Timer::add_timeout(const TimerFn &callback, unsigned long interval, void *parameter) {
     return _add(callback, interval, false, parameter);
 }
 
@@ -21,7 +21,7 @@ void Timer::clear_timeout(unsigned long timer_id) {
     _clear(timer_id);
 }
 
-unsigned long Timer::add_interval(TimerFn callback, unsigned long interval, void *parameter) {
+unsigned long Timer::add_interval(const TimerFn &callback, unsigned long interval, void *parameter) {
     return _add(callback, interval, true, parameter);
 }
 
@@ -49,7 +49,7 @@ void Timer::handle_timers() {
     }
 }
 
-unsigned long Timer::_add(TimerFn callback, unsigned long interval, bool repeat, void *parameter) {
+unsigned long Timer::_add(const TimerFn &callback, unsigned long interval, bool repeat, void *parameter) {
     if (_free_count == 0) _grow();
 
     for (unsigned long i = 0; i < _count; ++i) {

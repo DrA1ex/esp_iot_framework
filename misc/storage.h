@@ -39,7 +39,7 @@ public:
 
     [[nodiscard]] inline uint16_t size() const { return sizeof(_header) + sizeof(_version) + sizeof(T); }
 
-    [[nodiscard]] inline Timer &timer() { return _timer; }
+    [[nodiscard]] inline Timer &timer() const { return _timer; }
     [[nodiscard]] inline bool is_pending_commit() const { return _save_timer_id != -1; }
 
     void reset();
@@ -47,9 +47,9 @@ public:
     void force_save();
 
 private:
-    [[nodiscard]] inline String _get_path() { return String(STORAGE_PATH) + _key; };
-    [[nodiscard]] bool _check_header(File &file, uint32_t &out_header, uint8_t out_version);
-    [[nodiscard]] bool _check_header(File &file);
+    [[nodiscard]] inline String _get_path() const { return String(STORAGE_PATH) + _key; };
+    [[nodiscard]] bool _check_header(File &file, uint32_t &out_header, uint8_t out_version) const;
+    [[nodiscard]] bool _check_header(File &file) const;
 
     void _commit_impl();
     bool _check_changed(File &file);
@@ -134,7 +134,7 @@ void Storage<T, S1>::_commit_impl() {
 }
 
 template<typename T, typename S1>
-bool Storage<T, S1>::_check_header(File &file, uint32_t &out_header, uint8_t out_version) {
+bool Storage<T, S1>::_check_header(File &file, uint32_t &out_header, uint8_t out_version) const {
     file.read((uint8_t *) &out_header, sizeof(_header));
     file.read((uint8_t *) &out_version, sizeof(_version));
 
@@ -142,7 +142,7 @@ bool Storage<T, S1>::_check_header(File &file, uint32_t &out_header, uint8_t out
 }
 
 template<typename T, typename S1>
-bool Storage<T, S1>::_check_header(File &file) {
+bool Storage<T, S1>::_check_header(File &file) const {
     decltype(_header) saved_header{};
     decltype(_version) saved_version{};
 

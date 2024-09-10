@@ -23,7 +23,7 @@ class Timer {
     unsigned long _free_count = 0;
 
     void _grow();
-    unsigned long _add(TimerFn callback, unsigned long interval, bool repeat, void *parameter = nullptr);
+    unsigned long _add(const TimerFn &callback, unsigned long interval, bool repeat, void *parameter = nullptr);
     void _clear(unsigned long timer_id);
 
 public:
@@ -31,9 +31,9 @@ public:
 
     void handle_timers();
 
-    unsigned long add_timeout(TimerFn callback, unsigned long interval, void *parameter = nullptr);
+    unsigned long add_timeout(const TimerFn &callback, unsigned long interval, void *parameter = nullptr);
     void clear_timeout(unsigned long timer_id);
 
-    unsigned long add_interval(TimerFn callback, unsigned long interval, void *parameter = nullptr);
+    unsigned long add_interval(const TimerFn &callback, unsigned long interval, void *parameter = nullptr);
     void clear_interval(unsigned long timer_id);
 };
