@@ -5,7 +5,7 @@
 #include "../protocol/type.h"
 
 template<typename ApplicationT, typename = std::enable_if_t<std::is_base_of_v<
-        AbstractApplication<typename ApplicationT::ConfigT, typename ApplicationT::MetaPropT>, ApplicationT>>>
+    AbstractApplication<typename ApplicationT::ConfigT, typename ApplicationT::MetaPropT>, ApplicationT>>>
 class PacketHandler {
 public:
     using PropEnumT = typename ApplicationT::PropEnumT;
@@ -31,21 +31,14 @@ private:
 protected:
     inline ApplicationT &app() { return _app; }
     inline BinaryProtocol<PacketEnumT> &protocol() { return _protocol; }
+
+    virtual void send_notification(uint32_t client_id, const Packet<PacketEnumT> &packet);
 };
 
 template<typename ApplicationT, typename S1>
 Response PacketHandler<ApplicationT, S1>::handle_packet_data(uint32_t client_id, const Packet<PacketEnumT> &packet) {
     auto response = handle_parameter_update(packet.header, packet.data);
-
-    if (response.is_ok()) {
-        const auto &packet_meta = app().packet_meta();
-        auto meta_iterator = packet_meta.find(packet.header->type);
-        if (meta_iterator != packet_meta.end()) {
-            app().notify_property_changed(this, meta_iterator->second.property, &client_id);
-        } else {
-            D_PRINTF("Unsupported notification packet type: %s\r\n", __debug_enum_str(packet.header->type));
-        }
-    }
+    if (response.is_ok()) send_notification(client_id, packet);
 
     return response;
 }
@@ -54,8 +47,7 @@ template<typename ApplicationT, typename S1>
 PacketHandler<ApplicationT, S1>::PacketHandler(ApplicationT &app) : _app(app), _protocol() {}
 
 template<typename ApplicationT, typename S1>
-Response
-PacketHandler<ApplicationT, S1>::handle_packet_data(uint32_t client_id, const uint8_t *buffer, uint16_t length) {
+Response PacketHandler<ApplicationT, S1>::handle_packet_data(uint32_t client_id, const uint8_t *buffer, uint16_t length) {
     const auto parseResponse = parse_packet(buffer, length);
     if (!parseResponse.success) return parseResponse.response;
 
@@ -72,4 +64,15 @@ Response PacketHandler<ApplicationT, S1>::handle_parameter_update(PacketHeaderT 
     }
     auto &meta = meta_iter->second;
     return _protocol.update_parameter_value(((uint8_t *) (&_app.config())) + meta.value_offset, meta.value_size, *header, data);
+}
+
+template<typename ApplicationT, typename S1>
+void PacketHandler<ApplicationT, S1>::send_notification(uint32_t client_id, const Packet<PacketEnumT> &packet) {
+    const auto &packet_meta = app().packet_meta();
+    auto meta_iterator = packet_meta.find(packet.header->type);
+    if (meta_iterator != packet_meta.end()) {
+        app().notify_property_changed(this, meta_iterator->second.property, &client_id);
+    } else {
+        D_PRINTF("Unsupported notification packet type: %s\r\n", __debug_enum_str(packet.header->type));
+    }
 }
