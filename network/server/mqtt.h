@@ -37,6 +37,7 @@ private:
 
 public:
     explicit MqttServer(ApplicationT &app);
+    virtual ~MqttServer() = default;
 
     void begin(const char *host, uint16_t port, const char *user, const char *password);
 
