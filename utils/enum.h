@@ -16,13 +16,18 @@
 
 
 #ifdef DEBUG
+#include <cstring>
+
 #define MAKE_ENUM(Name, Type, ...)                                                  \
     enum class Name: Type { __MAKE_ENUM_OPTS(__ENUM_VALUE, Name, __VA_ARGS__)  };   \
-    constexpr const char * __debug_enum_str(Name _e) {                              \
+    inline const char * __debug_enum_str(Name _e) {                                 \
         switch (_e) {                                                               \
             __MAKE_ENUM_OPTS(__ENUM_CASE, Name, __VA_ARGS__)                        \
-        default:                                                                    \
-            return "unknown";                                                       \
+            default: {                                                              \
+                static char _str[32] = {0};                                         \
+                sniprintf(_str, sizeof(_str), "Unknown (%i)", (int) _e);            \
+                return _str;                                                        \
+            }                                                                       \
         }                                                                           \
     }
 #else

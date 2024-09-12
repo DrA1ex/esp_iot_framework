@@ -25,6 +25,9 @@ enum class ResponseCode : uint8_t {
 MAKE_ENUM(SystemPacketTypeEnum, uint8_t,
           RESPONSE_STRING, 0xf0,
           RESPONSE_BINARY, 0xf1,
+
+          GET_CONFIG, 0xfa,
+          RESTART, 0xfb,
 )
 
 struct Response {

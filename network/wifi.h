@@ -28,7 +28,7 @@ class WifiManager {
 public:
     WifiManager(const char *_ssid, const char *password, unsigned long connection_check_interval = 5000u);
 
-    void connect(WifiMode mode, unsigned long connection_interval = 0);
+    void connect(WifiMode mode, unsigned long connection_interval = 120000u);
     void handle_connection();
 
     inline WifiManagerState state() { return _state; }

@@ -36,8 +36,8 @@ public:
     using PropEnumT = typename MetaPropT::PropEnumT;
     using PacketEnumT = typename MetaPropT::PacketEnumT;
 
-    virtual inline ConfigT &config() = 0;
-
+    virtual ConfigT &config() = 0;
+    virtual void restart() = 0;
 
     explicit AbstractApplication(const std::map<PacketEnumT, MetaT> &props);
     virtual ~AbstractApplication() = default;

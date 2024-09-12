@@ -154,7 +154,10 @@ PacketParsingResponse<PacketT> BinaryProtocol<PacketT, S1>::parse_packet(const u
         return PacketParsingResponse<PacketT>::fail(Response::code(ResponseCode::BAD_REQUEST), packet->request_id);
     }
 
-    D_PRINTF("---- Packet type: %s\r\n", __debug_enum_str(packet->type));
+    D_PRINTF("---- Packet type: %s\r\n", (int) packet->type < 0xf0
+                                         ? __debug_enum_str(packet->type)
+                                         : __debug_enum_str((SystemPacketTypeEnum) packet->type));
+
     D_PRINTF("---- Packet Request-ID: %u\r\n", packet->request_id);
     D_PRINTF("---- Packet Data-Size: %u\r\n", packet->size);
 
