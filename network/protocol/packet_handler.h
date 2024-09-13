@@ -15,7 +15,7 @@ public:
     explicit PacketHandler(ApplicationT &app);
     virtual ~PacketHandler() = default;
 
-    virtual Response handle_packet_data(uint32_t client_id, const uint8_t *buffer, uint16_t length);
+    virtual Response handle_packet_buffer(uint32_t client_id, const uint8_t *buffer, uint16_t length);
     virtual Response handle_packet_data(uint32_t client_id, const Packet<PacketEnumT> &packet);
 
     virtual Response handle_parameter_update(PacketHeaderT *header, const void *data);
@@ -36,6 +36,17 @@ protected:
     virtual void send_notification(uint32_t client_id, const Packet<PacketEnumT> &packet);
 };
 
+template<typename ApplicationT, typename S1>
+PacketHandler<ApplicationT, S1>::PacketHandler(ApplicationT &app) : _app(app), _protocol() {}
+
+
+template<typename ApplicationT, typename S1>
+Response PacketHandler<ApplicationT, S1>::handle_packet_buffer(uint32_t client_id, const uint8_t *buffer, uint16_t length) {
+    const auto parse_response = parse_packet(buffer, length);
+    if (!parse_response.success) return parse_response.response;
+
+    return handle_packet_data(client_id, parse_response.packet);
+}
 
 template<typename ApplicationT, typename S1>
 Response PacketHandler<ApplicationT, S1>::handle_packet_data(uint32_t client_id, const Packet<PacketEnumT> &packet) {
@@ -47,17 +58,6 @@ Response PacketHandler<ApplicationT, S1>::handle_packet_data(uint32_t client_id,
     if (response.is_ok()) send_notification(client_id, packet);
 
     return response;
-}
-
-template<typename ApplicationT, typename S1>
-PacketHandler<ApplicationT, S1>::PacketHandler(ApplicationT &app) : _app(app), _protocol() {}
-
-template<typename ApplicationT, typename S1>
-Response PacketHandler<ApplicationT, S1>::handle_packet_data(uint32_t client_id, const uint8_t *buffer, uint16_t length) {
-    const auto parseResponse = parse_packet(buffer, length);
-    if (!parseResponse.success) return parseResponse.response;
-
-    return handle_packet_data(client_id, parseResponse.packet);
 }
 
 template<typename ApplicationT, typename S1>
