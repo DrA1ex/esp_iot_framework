@@ -36,21 +36,23 @@ class WebSocketServer : ServerBase<ApplicationT> {
     const char *_path;
     AsyncWebSocket _ws;
 
+    uint32_t _client_count = 0;
+
 public:
     explicit WebSocketServer(ApplicationT &app, PacketHandlerT &handler, const char *path = "/ws");
 
     void begin(WebServer &server);
 
-    virtual void handle_incoming_data() override;
-
-protected:
-    void on_event(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
+    void handle_incoming_data() override;
 
     void notify_clients(uint32_t sender_id, PacketEnumT type);
     void notify_clients(uint32_t sender_id, PacketEnumT type, const void *data, uint8_t size);
 
     template<typename T>
     void notify_clients(uint32_t sender_id, PacketEnumT type, const T &value);
+
+protected:
+    void on_event(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 
 private:
     void _send_response(uint32_t client_id, uint16_t request_id, const Response &response);
@@ -109,10 +111,17 @@ void WebSocketServer<ApplicationT, C1>::on_event(AsyncWebSocket *,
 
     switch (type) {
         case WS_EVT_CONNECT:
+            _client_count += 1;
             D_PRINTF("WebSocket client #%u connected from %s\r\n", client->id(), client->remoteIP().toString().c_str());
             break;
 
         case WS_EVT_DISCONNECT:
+            if (_client_count > 0) {
+                _client_count -= 1;
+            } else {
+                D_PRINT("WebSocket: Unexpected client disconnect.");
+            }
+
             D_PRINTF("WebSocket client #%u disconnected\r\n", client->id());
             break;
 
@@ -157,6 +166,8 @@ void WebSocketServer<ApplicationT, C1>::notify_clients(uint32_t sender_id, Packe
 
 template<typename ApplicationT, typename C1>
 void WebSocketServer<ApplicationT, C1>::notify_clients(uint32_t sender_id, PacketEnumT type, const void *data, uint8_t size) {
+    if (_client_count == 0) return;
+
     uint8_t message[sizeof(PacketHeader<PacketEnumT>) + size];
 
     (*(PacketHeader<PacketEnumT> *) message) = PacketHeader<PacketEnumT>{PACKET_SIGNATURE, 0, type, size};
@@ -175,8 +186,6 @@ void WebSocketServer<ApplicationT, C1>::notify_clients(uint32_t sender_id, Packe
 template<typename ApplicationT, typename C1>
 template<typename T>
 void WebSocketServer<ApplicationT, C1>::notify_clients(uint32_t sender_id, PacketEnumT type, const T &value) {
-    D_PRINTF("WebSocket send value message size: %u\r\n", sizeof(value));
-
     notify_clients(sender_id, type, &value, sizeof(value));
 }
 
