@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <type_traits>
 
 #include "../../utils/enum.h"
 
@@ -79,22 +80,28 @@ struct Response {
     }
 };
 
-template<typename PacketEnumT, typename = std::enable_if_t<std::is_enum_v<PacketEnumT>>>
+template<typename PacketEnumT>
 struct __attribute__ ((packed))  PacketHeader {
+    static_assert(std::is_enum_v<PacketEnumT>, "PacketEnumT should be an enum");
+
     uint16_t signature;
     uint16_t request_id;
     PacketEnumT type;
-    uint8_t size;
+    uint16_t size;
 };
 
-template<typename PacketEnumT, typename = std::enable_if_t<std::is_enum_v<PacketEnumT>>>
+template<typename PacketEnumT>
 struct Packet {
+    static_assert(std::is_enum_v<PacketEnumT>, "PacketEnumT should be an enum");
+
     PacketHeader<PacketEnumT> *header;
     const void *data;
 };
 
-template<typename PacketEnumT, typename = std::enable_if_t<std::is_enum_v<PacketEnumT>>>
+template<typename PacketEnumT>
 struct PacketParsingResponse {
+    static_assert(std::is_enum_v<PacketEnumT>, "PacketEnumT should be an enum");
+
     bool success;
     uint16_t request_id;
 
