@@ -70,7 +70,7 @@ class ComplexParameter : public AbstractParameter {
 public:
     using Type = T;
 
-    ComplexParameter(T *value) : _value(value) {}
+    ComplexParameter(T *value) : _value(value) {} // NOLINT(*-explicit-constructor)
 
     bool set_value(const void *data, size_t size) override {
         if (size != sizeof(T)) return false;
@@ -85,33 +85,7 @@ public:
 
     bool parse(const String &data) override { return false; }
 
-    [[nodiscard]] String to_string() const override { return "Not Supported"; }
-};
-
-template<typename T, typename = std::enable_if_t<std::is_standard_layout_v<T>>>
-class GeneratedParameter : public AbstractParameter {
-public:
-    using Type = T;
-    using GeneratorFn = std::function<T()>;
-
-    GeneratedParameter(GeneratorFn generator) : _generator(std::move(generator)) {}
-
-    bool set_value(const void *data, size_t size) override { return false; }
-
-    [[nodiscard]] const void *get_value() const override {
-        _value = _generator();
-        return &_value;
-    }
-
-    [[nodiscard]] size_t size() const override { return sizeof(T); }
-
-    bool parse(const String &data) override { return false; }
-
-    [[nodiscard]] String to_string() const override { return "Not Supported"; }
-
-private:
-    mutable T _value;
-    GeneratorFn _generator;
+    [[nodiscard]] String to_string() const override { return "*Not supported*"; }
 };
 
 class FixedString : public AbstractParameter {
@@ -145,6 +119,42 @@ public:
     [[nodiscard]] String to_string() const override {
         return {_ptr, strnlen(_ptr, _size)};
     }
+};
+
+template<typename T, typename = std::enable_if_t<std::is_standard_layout_v<T>>>
+class GeneratedParameter : public AbstractParameter {
+public:
+    using Type = T;
+    using GeneratorFn = std::function<T()>;
+
+    GeneratedParameter(GeneratorFn generator) : _generator(std::move(generator)) {} // NOLINT(*-explicit-constructor)
+
+    bool set_value(const void *data, size_t size) override { return false; }
+
+    [[nodiscard]] const void *get_value() const override {
+        _value = _generator();
+        return &_value;
+    }
+
+    [[nodiscard]] size_t size() const override { return sizeof(T); }
+
+    bool parse(const String &data) override { return false; }
+
+    [[nodiscard]] String to_string() const override {
+        if constexpr (std::is_constructible_v<T, String>) {
+            return String(*(T *) get_value());
+        }
+
+        if constexpr (std::is_constructible_v<int, T>) {
+            return String((int) *(T *) get_value());
+        }
+
+        return "*Not supported*";
+    }
+
+private:
+    mutable T _value;
+    GeneratorFn _generator;
 };
 
 typedef std::function<void()> Command;

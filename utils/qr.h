@@ -1,6 +1,8 @@
 #pragma once
 
 #ifdef ARDUINO_ARCH_ESP32
+
+#include <Arduino.h>
 #include <qrcode.h>
 
 inline void qr_print_string(const char *str) {
@@ -20,6 +22,7 @@ inline void qr_print_wifi_connection(const char *ssid, const char *password) {
     connection_str += password;
     connection_str += ";;";
 
+    Serial.flush();
     qr_print_string(connection_str.c_str());
 }
 

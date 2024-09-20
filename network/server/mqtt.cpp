@@ -1,5 +1,9 @@
 #include "mqtt.h"
 
+void MqttServer::set_prefix(String str) {
+    _topic_prefix = std::move(str);
+}
+
 void MqttServer::register_command(String topic, Command command) {
     _commands[std::move(topic)] = std::move(command);
 }
@@ -41,7 +45,7 @@ void MqttServer::send_notification(const String &topic) {
 }
 
 void MqttServer::_publish(const String &topic, const String &payload) {
-    _publish(topic.c_str(), 1, payload.c_str(), payload.length());
+    _publish_impl((_topic_prefix + topic).c_str(), 1, payload.c_str(), payload.length());
 }
 
 void MqttServer::begin(const char *host, uint16_t port, const char *user, const char *password) {
@@ -93,8 +97,8 @@ void MqttServer::_change_state(MqttServerState state) {
 void MqttServer::_on_connect(bool) {
     D_PRINT("MQTT Connected");
 
-    for (const auto &[topic, _]: _commands) _subscribe(topic.c_str(), 1);
-    for (const auto &[topic, _]: _parameters) _subscribe(topic.c_str(), 1);
+    for (const auto &[topic, _]: _commands) _subscribe(topic.c_str());
+    for (const auto &[topic, _]: _parameters) _subscribe(topic.c_str());
 
     _last_connection_attempt_time = millis();
     _change_state(MqttServerState::CONNECTED);
@@ -110,18 +114,34 @@ void MqttServer::_on_message(char *topic, char *payload, AsyncMqttClientMessageP
                              size_t len, size_t index, size_t total) {
     D_PRINTF("MQTT Received: %s: \"%.*s\"\r\n", topic, len, payload);
 
-    String topic_str(topic);
+    bool prefix_match = true;
+    auto *cut_topic = topic;
+
+    for (int i = 0; i < _topic_prefix.length(); ++i) {
+        if (*cut_topic == '\0' || *cut_topic != _topic_prefix[i]) {
+            prefix_match = false;
+            break;
+        }
+
+        ++cut_topic;
+    }
+
+    String topic_str(prefix_match ? cut_topic : topic);
     String payload_str(payload, len);
 
     _process_message(topic_str, payload_str);
 }
 
-void MqttServer::_subscribe(const char *topic, uint8_t qos) {
+void MqttServer::_subscribe(const String &topic) {
+    _subscribe_impl((_topic_prefix + topic).c_str(), 1);
+}
+
+void MqttServer::_subscribe_impl(const char *topic, uint8_t qos) {
     _mqtt_client.subscribe(topic, qos);
     D_PRINTF("MQTT Subscribe: \"%s\"\r\n", topic);
 }
 
-void MqttServer::_publish(const char *topic, uint8_t qos, const char *payload, size_t length) {
+void MqttServer::_publish_impl(const char *topic, uint8_t qos, const char *payload, size_t length) {
     if (_state != MqttServerState::CONNECTED) {
         D_PRINTF("MQTT Not connected. Skip message to %s\r\n", topic);
         return;

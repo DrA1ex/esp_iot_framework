@@ -1,3 +1,5 @@
+#pragma once
+
 #include <AsyncMqttClient.h>
 #include <map>
 
@@ -26,8 +28,12 @@ class MqttServer {
     std::map<String, std::pair<String, AbstractParameter *>> _parameters;
     std::map<const AbstractParameter *, String> _parameters_topic;
 
+    String _topic_prefix;
+
 public:
     MqttServer() = default;
+
+    void set_prefix(String str);
 
     void begin(const char *host, uint16_t port, const char *user, const char *password);
     void handle_connection();
@@ -49,10 +55,11 @@ private:
     void _on_disconnect(AsyncMqttClientDisconnectReason reason);
     void _on_message(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 
-    void _subscribe(const char *topic, uint8_t qos);
+    void _subscribe(const String& topic);
+    void _subscribe_impl(const char *topic, uint8_t qos);
 
     void _publish(const String &topic, const String &payload);
-    void _publish(const char *topic, uint8_t qos, const char *payload, size_t length);
+    void _publish_impl(const char *topic, uint8_t qos, const char *payload, size_t length);
 
     void _process_message(const String &topic, const String &payload);
 
