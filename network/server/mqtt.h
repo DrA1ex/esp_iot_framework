@@ -22,8 +22,10 @@ enum class MqttServerState : uint8_t {
     DISCONNECTED
 };
 
+typedef std::function<void(const String &payload)> MqttCommand;
+
 class MqttServer {
-    std::map<String, Command> _commands;
+    std::map<String, MqttCommand> _commands;
     std::map<String, const AbstractParameter *> _notifications;
     std::map<String, std::pair<String, AbstractParameter *>> _parameters;
     std::map<const AbstractParameter *, String> _parameters_topic;
@@ -39,6 +41,7 @@ public:
     void handle_connection();
 
     void register_command(String topic, Command command);
+    void register_command(String topic, MqttCommand command);
     void register_notification(String topic, const AbstractParameter *parameter);
     void register_parameter(String topic_in, String topic_out, AbstractParameter *parameter);
 
@@ -55,7 +58,7 @@ private:
     void _on_disconnect(AsyncMqttClientDisconnectReason reason);
     void _on_message(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
 
-    void _subscribe(const String& topic);
+    void _subscribe(const String &topic);
     void _subscribe_impl(const char *topic, uint8_t qos);
 
     void _publish(const String &topic, const String &payload);

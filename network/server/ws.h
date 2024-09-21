@@ -27,13 +27,15 @@ struct WebSocketRequest {
     uint8_t data[WS_MAX_PACKET_SIZE] = {};
 };
 
+typedef std::function<void(const void *data, uint16_t size)> WebSocketCommand;
+
 template<typename PacketEnumT>
 class WebSocketServer {
     static_assert(std::is_enum_v<PacketEnumT>, "PacketEnumT should be an enum");
 
     using PacketT = Packet<PacketEnumT>;
 
-    std::map<PacketEnumT, Command> _commands;
+    std::map<PacketEnumT, WebSocketCommand> _commands;
     std::map<PacketEnumT, const AbstractParameter *> _data_requests;
     std::map<PacketEnumT, const AbstractParameter *> _notifications;
     std::map<PacketEnumT, AbstractParameter *> _parameters;
@@ -54,6 +56,7 @@ public:
     void handle_connection();
 
     void register_command(PacketEnumT type, Command command);
+    void register_command(PacketEnumT type, WebSocketCommand command);
     void register_data_request(PacketEnumT type, const AbstractParameter *parameter);
     void register_notification(PacketEnumT type, const AbstractParameter *parameter);
     void register_parameter(PacketEnumT type, AbstractParameter *parameter);
@@ -133,7 +136,7 @@ void WebSocketServer<PacketEnumT>::handle_connection() {
 template<typename PacketEnumT>
 Response WebSocketServer<PacketEnumT>::handle_packet_data(uint32_t client_id, PacketT packet) {
     if (auto cmd_it = _commands.find(packet.header->type); cmd_it != _commands.end()) {
-        cmd_it->second();
+        cmd_it->second(packet.data, packet.header->size);
         return Response::ok();
     } else if (auto data_it = _data_requests.find(packet.header->type); data_it != _data_requests.end()) {
         auto param = data_it->second;
@@ -168,6 +171,13 @@ Response WebSocketServer<PacketEnumT>::handle_packet_data(uint32_t client_id, Pa
 
 template<typename PacketEnumT>
 void WebSocketServer<PacketEnumT>::register_command(PacketEnumT type, Command command) {
+    register_command(type, [cmd = std::move(command)](auto, auto) {
+        cmd();
+    });
+}
+
+template<typename PacketEnumT>
+void WebSocketServer<PacketEnumT>::register_command(PacketEnumT type, WebSocketCommand command) {
     _commands[type] = std::move(command);
 }
 

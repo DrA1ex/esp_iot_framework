@@ -5,17 +5,27 @@ void MqttServer::set_prefix(String str) {
 }
 
 void MqttServer::register_command(String topic, Command command) {
+    register_command(std::move(topic), [cmd = std::move(command)](auto) {
+        cmd();
+    });
+}
+
+void MqttServer::register_command(String topic, MqttCommand command) {
     _commands[std::move(topic)] = std::move(command);
 }
 
 void MqttServer::register_notification(String topic, const AbstractParameter *parameter) {
+    if (!parameter) return;
+
     _notifications[topic] = parameter;
-    _parameters_topic[parameter] = topic;
+    _parameters_topic[parameter] = std::move(topic);
 }
 
 void MqttServer::register_parameter(String topic_in, String topic_out, AbstractParameter *parameter) {
+    if (!parameter) return;
+
     _parameters[std::move(topic_in)] = std::make_pair(topic_out, parameter);
-    _parameters_topic[parameter] = topic_out;
+    _parameters_topic[parameter] = std::move(topic_out);
 }
 
 void MqttServer::send_notification(const String &topic) {
@@ -154,7 +164,7 @@ void MqttServer::_publish_impl(const char *topic, uint8_t qos, const char *paylo
 
 void MqttServer::_process_message(const String &topic, const String &payload) {
     if (auto cmd_it = _commands.find(topic); cmd_it != _commands.end()) {
-        cmd_it->second();
+        cmd_it->second(payload);
     } else if (auto param_it = _parameters.find(topic); param_it != _parameters.end()) {
         const auto &[topic_out, param] = param_it->second;
         bool success = param->parse(payload);
@@ -177,3 +187,5 @@ void MqttServer::_process_notification(void *sender, const AbstractParameter *pa
 
     _publish(it->second, parameter->to_string());
 }
+
+
