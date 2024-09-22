@@ -41,11 +41,15 @@ void Timer::handle_timers() {
         if (entry.repeat) {
             entry.created_at = now;
         } else {
-            _clear(i);
+            entry.active = false;
         }
 
         VERBOSE(D_PRINTF("Call timer: %lu\r\n", i));
         entry.callback(entry.parameter);
+
+        if (!entry.repeat) {
+            _clear(i);
+        }
     }
 }
 
