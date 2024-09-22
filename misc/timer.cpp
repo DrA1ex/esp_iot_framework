@@ -38,14 +38,14 @@ void Timer::handle_timers() {
         const auto now = millis();
         if (!entry.active || (now - entry.created_at) < entry.interval) continue;
 
-        VERBOSE(D_PRINTF("Call timer: %lu\r\n", i));
-
-        entry.callback(entry.parameter);
         if (entry.repeat) {
             entry.created_at = now;
         } else {
             _clear(i);
         }
+
+        VERBOSE(D_PRINTF("Call timer: %lu\r\n", i));
+        entry.callback(entry.parameter);
     }
 }
 
