@@ -179,6 +179,8 @@ void MqttServer::_process_message(const String &topic, const String &payload) {
 }
 
 void MqttServer::_process_notification(void *sender, const AbstractParameter *parameter) {
+    if (sender == this) return;
+
     auto it = _parameters_topic.find(parameter);
     if (it == _parameters_topic.end()) {
         VERBOSE(D_PRINT("MQTT: Unsupported parameter notification"));
