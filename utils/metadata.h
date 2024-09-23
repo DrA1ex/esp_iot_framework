@@ -12,6 +12,13 @@ inline auto _visit_impl(const MetaVisitFn &fn, T &t) -> decltype(std::declval<T>
     return t.visit(fn);
 }
 
+template<typename T, std::size_t N>
+inline void _visit_impl(const MetaVisitFn &fn, T (&array)[N]) {
+    for (std::size_t i = 0; i < N; ++i) {
+        _visit_impl(fn, array[i]);
+    }
+}
+
 inline void _visit_impl(const MetaVisitFn &fn, AbstractPropertyMeta &meta) {
     fn(&meta);
 }
