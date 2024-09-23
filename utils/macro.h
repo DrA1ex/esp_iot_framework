@@ -23,3 +23,8 @@
 #define FOR_EACH_IMPL_3(MACRO, Arg, _1, _2, _3, ...) MACRO(Arg, _1, _2, _3) \
     __VA_OPT__(FOR_EACH_IMPL_AGAIN_3 __PARENS (MACRO, Arg, __VA_ARGS__))
 #define FOR_EACH_IMPL_AGAIN_3() FOR_EACH_IMPL_3
+
+#define FOR_EACH_OPTS_4(MACRO, Arg, ...) __EXPAND(FOR_EACH_IMPL_4(MACRO, Arg, __VA_ARGS__))
+#define FOR_EACH_IMPL_4(MACRO, Arg, _1, _2, _3, _4, ...) MACRO(Arg, _1, _2, _3, _4) \
+    __VA_OPT__(FOR_EACH_IMPL_AGAIN_4 __PARENS (MACRO, Arg, __VA_ARGS__))
+#define FOR_EACH_IMPL_AGAIN_4() FOR_EACH_IMPL_4
