@@ -137,7 +137,12 @@ void MqttServer::_on_message(char *topic, char *payload, AsyncMqttClientMessageP
     }
 
     String topic_str(prefix_match ? cut_topic : topic);
+#if ARDUINO_ARCH_ESP32
     String payload_str(payload, len);
+#else
+    String payload_str;
+    payload_str.concat(payload, len);
+#endif
 
     _process_message(topic_str, payload_str);
 }

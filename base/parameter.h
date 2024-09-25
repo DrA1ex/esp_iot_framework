@@ -101,7 +101,7 @@ public:
         if (size > _size) return false;
 
         memcpy(_ptr, data, _size);
-        if (size < _size) memset(_ptr, 0, size - _size);
+        if (size < _size) memset(_ptr + size, 0, _size - size);
         return true;
     }
 
@@ -112,12 +112,17 @@ public:
     bool parse(const String &data) override {
         if (data.length() > _size) return false;
 
-        set_value(data.c_str(), data.length());
-        return true;
+        return set_value(data.c_str(), data.length());
     }
 
     [[nodiscard]] String to_string() const override {
+#if ARDUINO_ARCH_ESP32
         return {_ptr, strnlen(_ptr, _size)};
+#else
+        String str;
+        str.concat(_ptr, strnlen(_ptr, _size));
+        return str;
+#endif
     }
 };
 
