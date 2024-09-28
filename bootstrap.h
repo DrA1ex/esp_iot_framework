@@ -40,10 +40,10 @@ struct BootstrapConfig {
 };
 
 MAKE_ENUM_AUTO(BootstrapState, uint8_t,
-               UNINITIALIZED,
-               WIFI_CONNECT,
-               INITIALIZING,
-               READY,
+    UNINITIALIZED,
+    WIFI_CONNECT,
+    INITIALIZING,
+    READY,
 )
 
 template<typename ConfigT, typename PacketEnumT>
@@ -110,7 +110,7 @@ void Bootstrap<ConfigT, PacketEnumT>::begin(BootstrapConfig bootstrap_config) {
 
 template<typename ConfigT, typename PacketEnumT>
 void Bootstrap<ConfigT, PacketEnumT>::save_changes() {
-    _config_storage.save();
+    if (!_config_storage.is_pending_commit()) _config_storage.save();
 }
 
 template<typename ConfigT, typename PacketEnumT>
@@ -187,7 +187,7 @@ void Bootstrap<ConfigT, PacketEnumT>::_service_loop() {
             if (_bootstrap_config.mqtt_enabled) {
                 _mqtt_server->set_prefix(_bootstrap_config.mdns_name);
                 _mqtt_server->begin(_bootstrap_config.mqtt_host, _bootstrap_config.mqtt_port,
-                                    _bootstrap_config.mqtt_user, _bootstrap_config.mqtt_password);
+                    _bootstrap_config.mqtt_user, _bootstrap_config.mqtt_password);
             }
 
             D_PRINT("ESP Ready");
