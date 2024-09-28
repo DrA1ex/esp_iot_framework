@@ -65,7 +65,7 @@ void WifiManager::handle_connection() {
         D_PRINT("Wi-Fi connection lost");
 
         _state = WifiManagerState::DISCONNECTED;
-        connect(_mode);
+        connect(_mode, _connection_interval);
     }
 }
 void WifiManager::_connect_ap() {
