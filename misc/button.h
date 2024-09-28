@@ -33,9 +33,10 @@ class Button {
     ButtonOnHoldFn _hold_release_handler = nullptr;
 
     uint8_t _pin;
+    bool _high_state;
 
 public:
-    explicit Button(uint8_t pin);
+    explicit Button(uint8_t pin, bool high_state = true);
 
     void begin();
     void handle();
@@ -45,6 +46,8 @@ public:
     inline void set_on_hold_release(const ButtonOnHoldFn &fn) { _hold_release_handler = fn; }
 
 private:
+    bool _read() const;
+
     IRAM_ATTR static void _handle_interrupt(void *arg);
     IRAM_ATTR void _handle_interrupt();
 

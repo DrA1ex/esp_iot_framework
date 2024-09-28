@@ -2,7 +2,7 @@
 
 #include "../debug.h"
 
-Button::Button(uint8_t pin) : _pin(pin) {}
+Button::Button(uint8_t pin, bool high_state) : _pin(pin), _high_state(high_state) {}
 
 void Button::begin() {
     pinMode(_pin, INPUT);
@@ -10,6 +10,10 @@ void Button::begin() {
     attachInterruptArg(digitalPinToInterrupt(_pin), _handle_interrupt, this, CHANGE);
 
     D_PRINTF("Setup button interruption for pin %u\n", _pin);
+}
+
+bool Button::_read() const {
+    return digitalRead(_pin) ^ !_high_state;
 }
 
 void Button::_handle_interrupt(void *arg) {
@@ -23,7 +27,7 @@ void Button::_handle_interrupt() {
 
     if (silence_time < BTN_SILENCE_INTERVAL) return;
 
-    if (digitalRead(_pin)) {
+    if (_read()) {
         _handle_rising_interrupt();
     } else {
         _handle_falling_interrupt();
@@ -51,7 +55,7 @@ void Button::_handle_falling_interrupt() {
 void Button::handle() {
     unsigned long delta = millis() - _last_impulse_time;
 
-    const bool state = digitalRead(_pin);
+    const bool state = _read();
     if (!_hold && state && delta >= BTN_HOLD_INTERVAL) {
         VERBOSE(D_PRINT("Button: Set Hold"));
         _hold = true;
