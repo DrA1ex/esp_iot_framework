@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <AsyncWebSocket.h>
 
 #include "../../debug.h"
 #include "../../base/parameter.h"
