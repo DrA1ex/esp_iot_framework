@@ -41,7 +41,8 @@ void Timer::handle_timers() {
         if (entry.repeat) {
             entry.created_at = now;
         } else {
-            entry.active = false;
+            // To avoid repeating run if handle_timers() was called from callback
+            entry.interval = ~0ul;
         }
 
         VERBOSE(D_PRINTF("Call timer: %lu\r\n", i));
@@ -69,12 +70,12 @@ unsigned long Timer::_add(const TimerFn &callback, unsigned long interval, bool 
 
         _free_count--;
 
-        VERBOSE(D_PRINTF("Add %s: %lu. Used: %lu / %lu\r\n", interval ? "interval" : "timeout", i, _count - _free_count, _count));
+        VERBOSE(D_PRINTF("Add %s: %lu. Used: %lu / %lu\r\n", repeat ? "interval" : "timeout", i, _count - _free_count, _count));
 
         return i;
     }
 
-    // We shouldn't be here
+    D_PRINT("Timer: Failed to add timer. No free slots!");
     return -1ul;
 }
 
@@ -92,11 +93,18 @@ void Timer::_clear(unsigned long timer_id) {
 
 void Timer::_grow() {
     const unsigned long new_count = _count + TIMER_GROW_AMOUNT;
-    auto *new_data = new TimerEntry[new_count];
+    TimerEntry *new_data = nullptr;
+
+    try {
+        new_data = new TimerEntry[new_count];
+    } catch (...) {
+        D_PRINT("Timer: Unable to allocate memory");
+        return;
+    }
 
     if (_entries != nullptr) {
         for (unsigned long i = 0; i < _count; ++i) {
-            new_data[i] = _entries[i];
+            new_data[i] = std::move(_entries[i]);
         }
 
         delete[] _entries;

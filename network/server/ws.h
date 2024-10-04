@@ -142,13 +142,13 @@ Response WebSocketServer<PacketEnumT>::handle_packet_data(uint32_t client_id, Pa
     } else if (auto data_it = _data_requests.find(packet.header->type); data_it != _data_requests.end()) {
         auto param = data_it->second;
         return Response{
-                .type = ResponseType::BINARY,
-                .body = {
-                        .buffer = {
-                                .size = (uint16_t) param->size(),
-                                .data = (uint8_t *) param->get_value()
-                        }
+            .type = ResponseType::BINARY,
+            .body = {
+                .buffer = {
+                    .size = (uint16_t) param->size(),
+                    .data = (uint8_t *) param->get_value()
                 }
+            }
         };
     } else if (auto param_it = _parameters.find(packet.header->type); param_it != _parameters.end()) {
         auto param = param_it->second;
@@ -200,7 +200,8 @@ void WebSocketServer<PacketEnumT>::register_parameter(PacketEnumT type, Abstract
 }
 
 template<typename PacketEnumT>
-void WebSocketServer<PacketEnumT>::on_event(AsyncWebSocket *, AsyncWebSocketClient *client, AwsEventType type, void *, uint8_t *data, size_t len) {
+void WebSocketServer<PacketEnumT>::on_event(
+    AsyncWebSocket *, AsyncWebSocketClient *client, AwsEventType type, void *, uint8_t *data, size_t len) {
     switch (type) {
         case WS_EVT_CONNECT:
             _client_count += 1;
@@ -221,19 +222,19 @@ void WebSocketServer<PacketEnumT>::on_event(AsyncWebSocket *, AsyncWebSocketClie
             D_PRINTF("WebSocket: received packet, size: %u\r\n", len);
 
             if (len == 0) {
-                send_response(client->id(), 0, Response::code(ResponseCode::PACKET_LENGTH_EXCEEDED));
+                send_response(client->id(), ~(uint16_t) 0, Response::code(ResponseCode::PACKET_LENGTH_EXCEEDED));
                 return;
             }
 
             if (len > WS_MAX_PACKET_SIZE) {
                 D_PRINTF("WebSocket: packet dropped. Max packet size %ui, but received %u\r\n", WS_MAX_PACKET_SIZE, len);
-                send_response(client->id(), 0, Response::code(ResponseCode::PACKET_LENGTH_EXCEEDED));
+                send_response(client->id(), ~(uint16_t) 0, Response::code(ResponseCode::PACKET_LENGTH_EXCEEDED));
                 return;
             }
 
             if (!_request_queue.can_acquire()) {
                 D_PRINT("WebSocket: packet dropped. Queue is full");
-                send_response(client->id(), 0, Response::code(ResponseCode::TOO_MANY_REQUEST));
+                send_response(client->id(), ~(uint16_t) 0, Response::code(ResponseCode::TOO_MANY_REQUEST));
                 return;
             }
 
@@ -254,8 +255,8 @@ void WebSocketServer<PacketEnumT>::on_event(AsyncWebSocket *, AsyncWebSocketClie
 template<typename PacketEnumT>
 void WebSocketServer<PacketEnumT>::send_response(uint32_t client_id, uint16_t request_id, const Response &response) {
     auto header = PacketHeader<SystemPacketTypeEnum>{
-            .signature = PACKET_SIGNATURE,
-            .request_id = request_id
+        .signature = PACKET_SIGNATURE,
+        .request_id = request_id
     };
 
     const void *data;
