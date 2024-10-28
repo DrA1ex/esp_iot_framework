@@ -95,9 +95,8 @@ void Timer::_grow() {
     const unsigned long new_count = _count + TIMER_GROW_AMOUNT;
     TimerEntry *new_data = nullptr;
 
-    try {
-        new_data = new TimerEntry[new_count];
-    } catch (...) {
+    new_data = new(std::nothrow) TimerEntry[new_count];
+    if (!new_data) {
         D_PRINT("Timer: Unable to allocate memory");
         return;
     }

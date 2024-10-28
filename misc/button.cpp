@@ -1,6 +1,8 @@
 #include "button.h"
 
+#ifdef SOC_GPIO_SUPPORT_DEEPSLEEP_WAKEUP
 #include <esp_sleep.h>
+#endif
 
 #include "../debug.h"
 
