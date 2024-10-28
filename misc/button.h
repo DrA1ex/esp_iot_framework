@@ -2,27 +2,6 @@
 
 #include <Arduino.h>
 
-#ifndef BTN_SILENCE_INTERVAL
-#define BTN_SILENCE_INTERVAL                    (40u)
-#endif
-
-#ifndef BTN_HOLD_INTERVAL
-#define BTN_HOLD_INTERVAL                       (500u)
-#endif
-
-#ifndef BTN_HOLD_CALL_INTERVAL
-#define BTN_HOLD_CALL_INTERVAL                  (500u)
-#endif
-
-#ifndef BTN_PRESS_WAIT_INTERVAL
-#define BTN_PRESS_WAIT_INTERVAL                 (500u)
-#endif
-
-#ifndef BTN_RESET_INTERVAL
-#define BTN_RESET_INTERVAL                      (1000u)
-#endif
-
-
 typedef std::function<void(uint8_t count)> ButtonOnClickFn;
 typedef ButtonOnClickFn ButtonOnHoldFn;
 
@@ -34,6 +13,13 @@ struct ButtonState {
 };
 
 class Button {
+    unsigned long _silence_interval = 40u;
+    unsigned long _hold_interval = 500u;
+    unsigned long _hold_call_interval = 500u;
+    unsigned long _press_wait_interval = 500u;
+    unsigned long _reset_interval = 1000u;
+
+
     volatile bool _hold = false;
     volatile int _click_count = 0;
 
@@ -65,6 +51,23 @@ public:
     inline void set_on_click(const ButtonOnClickFn &fn) { _click_handler = fn; }
     inline void set_on_hold(const ButtonOnHoldFn &fn) { _hold_handler = fn; }
     inline void set_on_hold_release(const ButtonOnHoldFn &fn) { _hold_release_handler = fn; }
+
+
+    inline void set_silence_interval(unsigned long interval) { _silence_interval = interval; }
+    [[nodiscard]] inline unsigned long silence_interval() const { return _silence_interval; }
+
+    inline void set_hold_interval(unsigned long interval) { _hold_interval = interval; }
+    [[nodiscard]] inline unsigned long hold_interval() const { return _hold_interval; }
+
+    inline void set_hold_call_interval(unsigned long interval) { _hold_call_interval = interval; }
+    [[nodiscard]] inline unsigned long hold_call_interval() const { return _hold_call_interval; }
+
+    inline void set_press_wait_interval(unsigned long interval) { _press_wait_interval = interval; }
+    [[nodiscard]] inline unsigned long press_wait_interval() const { return _press_wait_interval; }
+
+    inline void set_reset_interval(unsigned long interval) { _reset_interval = interval; }
+    [[nodiscard]] inline unsigned long geset_interval() const { return _reset_interval; }
+
 
 private:
     [[nodiscard]] bool _read() const;

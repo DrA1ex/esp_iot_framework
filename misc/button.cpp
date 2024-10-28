@@ -52,7 +52,7 @@ void Button::_handle_interrupt_change() {
     auto delta = millis() - _last_impulse_time;
     _last_impulse_time = millis();
 
-    if (delta < BTN_SILENCE_INTERVAL) {
+    if (delta < _silence_interval) {
         VERBOSE(D_PRINT("Button: filtering noise"));
         return;
     }
@@ -74,7 +74,7 @@ void Button::_handle_interrupt_change() {
 
 void Button::_handle_rising_interrupt(unsigned long delta) {
     VERBOSE(D_PRINT("Button Interception: RISING"));
-    if ((_click_count || _hold) && delta > BTN_RESET_INTERVAL) {
+    if ((_click_count || _hold) && delta > _reset_interval) {
         VERBOSE(D_PRINT("Button Interception: Start Over. Forget to call Button::handle() ?"));
         _hold = false;
         _click_count = 0;
@@ -94,7 +94,7 @@ void Button::handle() {
     unsigned long delta = millis() - _last_impulse_time;
 
     const bool state = _read();
-    if (!_hold && state && delta >= BTN_HOLD_INTERVAL) {
+    if (!_hold && state && delta >= _hold_interval) {
         VERBOSE(D_PRINT("Button: Set Hold"));
         _hold = true;
         _click_count++;
@@ -112,7 +112,7 @@ void Button::handle() {
 
     if (_hold) {
         auto hold_call_delta = millis() - _last_button_hold_call_time;
-        if (hold_call_delta >= BTN_HOLD_CALL_INTERVAL) {
+        if (hold_call_delta >= _hold_call_interval) {
             D_PRINTF("Button: Hold #%i\n", _click_count);
 
             _last_state.click_count = _click_count;
@@ -125,7 +125,7 @@ void Button::handle() {
 
             _last_button_hold_call_time = millis();
         }
-    } else if (_click_count && delta > BTN_PRESS_WAIT_INTERVAL) {
+    } else if (_click_count && delta > _press_wait_interval) {
         D_PRINTF("Button: Click count %i\n", _click_count);
 
         _last_state.click_count = _click_count;
