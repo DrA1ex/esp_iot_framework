@@ -11,12 +11,19 @@
 #define D_PRINTF(...) Serial.printf(__VA_ARGS__)
 #define D_WRITE(x) Serial.print(x)
 
-#define D_PRINT_HEX(ptr, length)                        \
-        D_WRITE("HEX: ");                               \
-        for (unsigned int i = 0; i < length; ++i) {     \
-            D_PRINTF("%02X ", (ptr)[i]);                \
-        }                                               \
-        D_PRINT()
+#define D_PRINT_HEX(ptr, length)                          \
+        D_WRITE("{ HEX: ");                               \
+        for (unsigned int i = 0; i < length; ++i) {       \
+        D_PRINTF("%02X", (ptr)[i]);                       \
+        }                                                 \
+D_PRINT(" }")
+
+#define D_PRINT_BIN(value)                                \
+        D_WRITE("{ BIN: ");                               \
+        for(int i = sizeof(value) * 8 - 1; i >= 0; --i) { \
+        D_WRITE((value >> i) & 0b1);                      \
+}                                                         \
+D_PRINT(" }")
 
 #define D_TIME_STRING(unix_time) ([](time_t time) {                             \
         static char buffer[20];                                                 \
@@ -36,6 +43,7 @@
 #define D_PRINTF(...)
 #define D_WRITE(x)
 #define D_PRINT_HEX(ptr, length)
+#define D_PRINT_BIN(x)
 
 #define VERBOSE(ARG)
 #endif
