@@ -9,8 +9,9 @@ enum class WifiManagerState {
 };
 
 enum class WifiMode : uint8_t {
-    AP = 0,
-    STA = 1
+    AP     = 0,
+    STA    = 1,
+    STA_AP = 2,
 };
 
 class WifiManager {
@@ -31,11 +32,11 @@ public:
     void connect(WifiMode mode, unsigned long connection_interval = 120000u);
     void handle_connection();
 
-    inline WifiManagerState state() { return _state; }
-    inline WifiMode mode() { return _mode; }
+    [[nodiscard]] WifiManagerState state() const { return _state; }
+    [[nodiscard]] WifiMode mode() const { return _mode; }
 
-    inline const char *ssid() { return _ssid; }
-    inline const char *password() { return _password; }
+    [[nodiscard]] const char *ssid() const { return _ssid; }
+    [[nodiscard]] const char *password() const { return _password; }
 
 private:
     void _connect_ap();
