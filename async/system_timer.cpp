@@ -1,14 +1,15 @@
 #ifdef ARDUINO_ARCH_ESP32
 
-#include "system_timer.h"
-
 #include <esp_task_wdt.h>
+
+#include "system_timer.h"
+#include "promise.h"
 
 bool SystemTimer::initialized = false;
 uint64_t SystemTimer::begin_processing_micros = 0;
 int SystemTimer::processed_tasks = 0;
 
-SystemTimer::PriorityQueue SystemTimer::timers{};
+SystemTimer::PriorityQueue SystemTimer::timers {};
 portMUX_TYPE SystemTimer::spinlock = portMUX_INITIALIZER_UNLOCKED;
 
 Future<void> SystemTimer::delay(unsigned long timeout_ms) {
@@ -21,7 +22,7 @@ Future<void> SystemTimer::delay(unsigned long timeout_ms) {
         promise->set_error();
     }
 
-    return Future{promise};
+    return Future {promise};
 }
 
 bool SystemTimer::set_timeout(unsigned long timeout_ms, CallbackType callback) {

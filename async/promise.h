@@ -13,10 +13,8 @@
 
 class FutureBase;
 class PromiseBase;
-template<typename T>
-class Future;
-template<typename T>
-class Promise;
+template<typename T> class Future;
+template<typename T> class Promise;
 
 
 class PromiseBase {
@@ -72,7 +70,7 @@ private:
 
 template<typename T>
 class Promise final : public PromiseBase {
-    T _result{};
+    T _result {};
 
 public:
     Promise() = default;
@@ -170,5 +168,6 @@ void PromiseBase::_sequential_step(
             }
         });
 }
+
 
 #endif

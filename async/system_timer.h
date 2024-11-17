@@ -6,8 +6,6 @@
 #include <functional>
 #include <queue>
 
-#include "promise.h"
-
 #ifndef SYSTEM_TIMER_STACK_SIZE
 #define SYSTEM_TIMER_STACK_SIZE                             (4096u)
 #endif
@@ -23,6 +21,8 @@
 #ifndef SYSTEM_TIMER_TASK_RUNNING_TIMEOUT_MICRO
 #define SYSTEM_TIMER_TASK_RUNNING_TIMEOUT_MICRO             (100)
 #endif
+
+template<typename T> class Future;
 
 class SystemTimer {
     struct TimerTask;

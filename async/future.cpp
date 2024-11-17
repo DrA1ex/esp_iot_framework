@@ -58,4 +58,9 @@ Future<void> Future<void>::finally(std::function<void(const Future &)> fn) const
     return FutureBase::finally(*this, std::move(fn));
 }
 
+Future<void> Future<void>::with_timeout(unsigned long timeout) const {
+    return FutureBase::with_timeout(*this, timeout);
+}
+
+
 #endif

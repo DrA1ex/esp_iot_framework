@@ -5,7 +5,10 @@
 #include <functional>
 #include <memory>
 
+#include "system_timer.h"
 #include "../debug.h"
+
+class SystemTimer;
 
 class FutureBase;
 class PromiseBase;
@@ -36,6 +39,8 @@ protected:
 
     template<typename T> static Future<T> on_error(const Future<T> &future, std::function<Future<T>(const Future<T> &)> fn);
     template<typename T> static Future<T> finally(const Future<T> &future, std::function<void(const Future<T> &)> fn);
+
+    template<typename T> static Future<T> with_timeout(const Future<T> &future, unsigned long timeout);
 };
 
 template<typename T>
@@ -57,6 +62,8 @@ public:
 
     Future finally(std::function<void(const Future &)> fn) const;
     Future finally(std::function<void()> fn) const;
+
+    Future with_timeout(unsigned long timeout) const;
 };
 
 template<>
@@ -78,6 +85,8 @@ public:
 
     Future finally(std::function<void()> fn) const;
     Future finally(std::function<void(const Future &)> fn) const;
+
+    Future with_timeout(unsigned long timeout) const;
 };
 
 template<typename T, typename R> Future<R> FutureBase::then(const Future<T> &future, std::function<Future<R>(const Future<T> &)> fn) {
@@ -161,6 +170,28 @@ Future<T> FutureBase::finally(const Future<T> &future, std::function<void(const 
 }
 
 template<typename T>
+Future<T> FutureBase::with_timeout(const Future<T> &future, unsigned long timeout) {
+    if (timeout == 0) return future;
+
+    auto result = Promise<T>::create();
+
+    SystemTimer::set_timeout(timeout, [=] { if (!result->finished()) result->set_error(); });
+
+    future.on_finished([=](auto success) {
+        if (result->finished()) return;
+
+        if (success) {
+            if constexpr (std::is_void_v<T>) result->set_success();
+            else result->set_success(future.result());
+        } else {
+            result->set_error();
+        }
+    });
+
+    return result;
+}
+
+template<typename T>
 Future<T>::Future(const std::shared_ptr<Promise<T>> &promise) : FutureBase(promise) {}
 
 template<typename T>
@@ -182,7 +213,9 @@ template<typename R>
 Future<R> Future<T>::then(std::function<R(const Future &)> fn) { return FutureBase::then<T, R>(*this, std::move(fn)); }
 
 template<typename T>
-Future<T> Future<T>::on_error(std::function<Future(const Future &)> fn) const {
+Future<T> Future<T>::on_error(
+    std::function<Future(const Future &)> fn)
+const {
     return FutureBase::on_error(*this, std::move(fn));
 }
 
@@ -209,7 +242,14 @@ Future<T> Future<T>::finally(std::function<void()> fn) const {
 }
 
 template<typename T>
-Future<T> Future<T>::finally(std::function<void(const Future &)> fn) const {
+Future<T> Future<T>::with_timeout(unsigned long timeout) const {
+    return FutureBase::with_timeout<T>(*this, timeout);
+}
+
+template<typename T>
+Future<T> Future<T>::finally(
+    std::function<void(const Future &)> fn)
+const {
     return FutureBase::finally(*this, std::move(fn));
 }
 
