@@ -314,10 +314,10 @@ void WebSocketServer<PacketEnumT>::_notify_clients(uint32_t sender_id, PacketEnu
 
     bool sent = false;
     for (auto &client: _ws.getClients()) {
-        if (sender_id == client->id()) continue;
+        if (sender_id == client.id()) continue;
 
-        VERBOSE(D_PRINTF("Websocket: send notification to client: %u\r\n", client->id()));
-        _ws.binary(client->id(), message, sizeof(message));
+        VERBOSE(D_PRINTF("Websocket: send notification to client: %u\r\n", sender_id));
+        _ws.binary(client.id(), message, sizeof(message));
         sent = true;
     }
 

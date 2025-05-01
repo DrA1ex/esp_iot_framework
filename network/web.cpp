@@ -1,7 +1,7 @@
 #include "web.h"
 
 class WebLogger : public AsyncWebHandler {
-    bool canHandle(AsyncWebServerRequest *request) override {
+    bool canHandle(AsyncWebServerRequest *request) const override {
         D_PRINTF("WebServer: %s -> %s %s\r\n", request->client()->remoteIP().toString().c_str(),
                  request->methodToString(), request->url().c_str());
 
@@ -39,7 +39,7 @@ void WebAuthHandler::handleRequest(AsyncWebServerRequest *request) {
     request->redirect("https://google.com");
 }
 
-bool WebAuthHandler::canHandle(AsyncWebServerRequest *request) {
+bool WebAuthHandler::canHandle(AsyncWebServerRequest *request) const {
     bool is_local = (request->client()->getRemoteAddress() & PP_HTONL(0xffff0000UL)) == PP_HTONL(0xc0a80000UL);
     bool auth_required = _allow_local ? !is_local : true;
 

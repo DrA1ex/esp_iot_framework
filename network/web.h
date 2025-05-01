@@ -36,6 +36,6 @@ public:
 
     inline void set_allow_local(bool value) { _allow_local = value; }
 
-    virtual bool canHandle(AsyncWebServerRequest *request) override final;
+    virtual bool canHandle(AsyncWebServerRequest *request) const override final;
     virtual void handleRequest(AsyncWebServerRequest *request) override final;
 };
