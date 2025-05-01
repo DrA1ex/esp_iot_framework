@@ -19,6 +19,7 @@ class Button {
     unsigned long _press_wait_interval = 500u;
     unsigned long _reset_interval = 1000u;
 
+    bool _hold_repeat = true;
 
     volatile bool _hold = false;
     volatile int _click_count = 0;
@@ -34,6 +35,7 @@ class Button {
     bool _high_state;
     bool _used_for_wakeup;
 
+    bool _hold_called = false;
     bool _last_interrupt_state = false;
     ButtonState _last_state;
 
@@ -52,6 +54,8 @@ public:
     inline void set_on_hold(const ButtonOnHoldFn &fn) { _hold_handler = fn; }
     inline void set_on_hold_release(const ButtonOnHoldFn &fn) { _hold_release_handler = fn; }
 
+    inline void set_hold_repeat(bool value) {_hold_repeat = value;}
+    [[nodiscard]] inline bool hold_repeat() const { return _hold_repeat; }
 
     inline void set_silence_interval(unsigned long interval) { _silence_interval = interval; }
     [[nodiscard]] inline unsigned long silence_interval() const { return _silence_interval; }

@@ -6,8 +6,9 @@
 
 #include "../debug.h"
 
-Button::Button(uint8_t pin, bool high_state, bool used_for_wakeup) : _pin(pin), _high_state(high_state),
-                                                                     _used_for_wakeup(used_for_wakeup) {}
+Button::Button(uint8_t pin, bool high_state, bool used_for_wakeup) :
+    _pin(pin), _high_state(high_state),
+    _used_for_wakeup(used_for_wakeup) {}
 
 void Button::begin(uint8_t mode) {
     pinMode(_pin, mode);
@@ -108,11 +109,12 @@ void Button::handle() {
         _hold = false;
         _click_count = 0;
         _last_interrupt_state = false;
+        _hold_called = false;
     }
 
     if (_hold) {
         auto hold_call_delta = millis() - _last_button_hold_call_time;
-        if (hold_call_delta >= _hold_call_interval) {
+        if ((!_hold_called || _hold_repeat) && hold_call_delta >= _hold_call_interval) {
             D_PRINTF("Button: Hold #%i\n", _click_count);
 
             _last_state.click_count = _click_count;
@@ -123,6 +125,7 @@ void Button::handle() {
                 _hold_handler(_click_count);
             }
 
+            _hold_called = true;
             _last_button_hold_call_time = millis();
         }
     } else if (_click_count && delta > _press_wait_interval) {
