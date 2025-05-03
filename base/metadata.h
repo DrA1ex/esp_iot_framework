@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "parameter.h"
 
 template<typename PacketEnumT>

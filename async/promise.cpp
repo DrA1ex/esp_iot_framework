@@ -40,7 +40,7 @@ void PromiseBase::_on_promise_finished() {
     if (_on_finished_callbacks.empty()) return;
 
     for (auto &callback: _on_finished_callbacks) {
-        Dispatcher::dispatch([=] {
+        Dispatcher::dispatch([=, this] {
             callback(_success);
         });
     }
@@ -70,7 +70,7 @@ void PromiseBase::on_finished(FutureFinishedCb callback) {
         portEXIT_CRITICAL(&spinlock);
 
         VERBOSE(D_PRINTF("Promise (%p): Set on_finished callback for already finished promise\r\n", this));
-        Dispatcher::dispatch([=, callback=std::move(callback)] {
+        Dispatcher::dispatch([=, this, callback=std::move(callback)] {
             callback(_success);
         });
     } else {

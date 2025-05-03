@@ -86,7 +86,7 @@ void Button::_handle_falling_interrupt(unsigned long delta) {
     VERBOSE(D_PRINT("Button Interception: FALLING"));
     if (!_hold) {
         VERBOSE(D_PRINT("Button Interception: Click"));
-        _click_count++;
+        _click_count += 1;
     }
 }
 
@@ -98,7 +98,7 @@ void Button::handle() {
     if (!_hold && state && delta >= _hold_interval) {
         VERBOSE(D_PRINT("Button: Set Hold"));
         _hold = true;
-        _click_count++;
+        _click_count += 1;
     } else if (_hold && !state) {
         D_PRINT("Button: Button hold release");
 

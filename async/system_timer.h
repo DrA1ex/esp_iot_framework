@@ -51,7 +51,7 @@ private:
     };
 
     static bool start_task();
-    static void timer_task(void *arg);
+    [[noreturn]] static void timer_task(void *arg);
 
     static bool process_pending_tasks();
     static bool has_pending_task();

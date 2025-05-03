@@ -20,12 +20,13 @@ public:
 
 template<typename T, typename = std::enable_if_t<std::is_integral_v<T> || std::is_floating_point_v<T>>>
 class Parameter : public AbstractParameter {
-    T *_value;
+    void *_value;
 
 public:
     using Type = T;
 
-    Parameter(T *value) : _value(value) {} // NOLINT(*-explicit-constructor)
+    Parameter(T *value) : _value((void *) value) {} // NOLINT(*-explicit-constructor)
+    Parameter(void *value) : _value(value) {}       // NOLINT(*-explicit-constructor)
 
     bool set_value(const void *data, size_t size) override {
         if (size != sizeof(T)) return false;

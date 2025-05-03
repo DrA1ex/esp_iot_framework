@@ -41,7 +41,7 @@ private:
     static bool notify_from_isr();
     static bool notify();
 
-    static void dispatcher_task(void *);
+    [[noreturn]] static void dispatcher_task(void *);
 
     static bool process_pending_tasks();
     static bool has_pending_task();
