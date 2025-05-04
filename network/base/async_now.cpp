@@ -168,8 +168,7 @@ void AsyncEspNow::_on_sent(const uint8_t *mac_addr, esp_now_send_status_t status
     }
 }
 
-void AsyncEspNow::_on_receive(const esp_now_recv_info *recv_info, const uint8_t *data, int data_len) {
-    const uint8_t *mac_addr = recv_info->src_addr;
+void AsyncEspNow::_on_receive(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
     EspNowPacket packet;
 
     packet.size = data_len;
