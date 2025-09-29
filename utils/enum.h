@@ -1,6 +1,7 @@
 #pragma once
 
 #include "macro.h"
+#include <cstdio>
 
 #define __ENUM_VALUE(Name, _1, _2) _1 = _2,
 #define __ENUM_CASE(Name, _1, _2) case Name::_1: return #_1;
