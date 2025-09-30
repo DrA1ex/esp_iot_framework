@@ -65,7 +65,7 @@ public:
     void send_notification(PacketEnumT type);
 
 protected:
-    void on_event(AsyncWebSocket *, AsyncWebSocketClient *client, AwsEventType type, void *, uint8_t *data, size_t len);
+    void on_event(AsyncWebSocket *, AsyncWebSocketClient *client, AwsEventType type, void *, const uint8_t *data, size_t len);
     void send_response(uint32_t client_id, uint16_t request_id, const Response &response);
 
     Response handle_packet_data(uint32_t client_id, PacketT packet);
@@ -74,7 +74,7 @@ private:
     template<typename T>
     void _notify_clients(uint32_t sender_id, PacketEnumT type, const T &value);
     void _notify_clients(uint32_t sender_id, PacketEnumT type);
-    void _notify_clients(uint32_t sender_id, PacketEnumT type, const void *data, uint8_t size);
+    void _notify_clients(uint32_t sender_id, PacketEnumT type, const void *data, uint16_t size);
 
     void _process_notification(void *sender, const AbstractParameter *parameter);
 };
@@ -201,7 +201,7 @@ void WebSocketServer<PacketEnumT>::register_parameter(PacketEnumT type, Abstract
 
 template<typename PacketEnumT>
 void WebSocketServer<PacketEnumT>::on_event(
-    AsyncWebSocket *, AsyncWebSocketClient *client, AwsEventType type, void *, uint8_t *data, size_t len) {
+    AsyncWebSocket *, AsyncWebSocketClient *client, AwsEventType type, void *, const uint8_t *data, size_t len) {
     switch (type) {
         case WS_EVT_CONNECT:
             _client_count += 1;
@@ -304,7 +304,7 @@ void WebSocketServer<PacketEnumT>::_notify_clients(uint32_t sender_id, PacketEnu
 }
 
 template<typename PacketEnumT>
-void WebSocketServer<PacketEnumT>::_notify_clients(uint32_t sender_id, PacketEnumT type, const void *data, uint8_t size) {
+void WebSocketServer<PacketEnumT>::_notify_clients(uint32_t sender_id, PacketEnumT type, const void *data, uint16_t size) {
     if (_client_count == 0) return;
 
     uint8_t message[sizeof(PacketHeader<PacketEnumT>) + size];
